@@ -1,0 +1,85 @@
+#include<Servo.h>
+//connect all servos RED to VCC, BROWN to ground,ORANGE to PWM
+Servo s1;//connect PWM to pin 3
+Servo s2;//connect PWM to pin 5
+Servo s3;//connect PWM to pin 6
+Servo s4;//connect PWM to pin 9
+Servo s5;//connect PWM to pin 10
+
+int sens=0; //variable to measure the value of the sensor output
+int count=1;//number of times the loop has been repeated. this is to help caliberate the device for the first loop
+int trig=0;//variable not used
+int max=0;//variable to record max value of the sensor reading during caliberation
+int arr[100];//array to store values during caliberation
+int i;//loop variable
+
+void setup(){
+  pinMode(A0,INPUT);//sensor is connected to pin A0
+  pinMode(3,OUTPUT);//s1
+  pinMode(5,OUTPUT);//s2
+  pinMode(6,OUTPUT);//s3
+  pinMode(9,OUTPUT);//s4
+  pinMode(10,OUTPUT);//s5
+  //all 5 servos are attached to their respective pins
+  s1.attach(3);
+  s2.attach(5);
+  s3.attach(6);
+  s4.attach(9);
+  s5.attach(10);
+  //resetting the servos to initial position i.e. 0 degree
+  s1.write(0);
+  s2.write(0);
+  s3.write(0);
+  s4.write(0);
+  s5.write(0);
+  //starting serial monitor for viewing data
+  Serial.begin(9600);
+}
+
+void loop(){
+  //calibration round i.e. the first time loop is being run
+  if(count==1){
+    for(i=0;i<=100;i++){
+      arr[i]=analogRead(A0);
+      Serial.println(analogRead(A0));
+      delay(100);
+    }
+    for(i=0;i<=100;i++){
+      if(arr[i]>max){
+        max=arr[i];
+      }
+    }
+    Serial.print("max=");
+    Serial.print(max);
+  }
+
+  sens=analogRead(A0);//reading the sensor value and storing in variable
+  
+  if(sens>=max-25){//25 units of buffer is set for ease of use 
+    // if sens is grater than max-25 then servos are activated and set to 180 deg state
+    s1.write(180);
+    s2.write(180);
+    s3.write(180);
+    s4.write(180);
+    s5.write(180);
+    Serial.println("Hand closed");
+    Serial.println(sens);
+    delay(1000);
+  }
+
+  else{//if sensor output is less than max-25 then set the servos to reset pos i.e. 0 deg
+    s1.write(0);
+    s2.write(0);
+    s3.write(0);
+    s4.write(0);
+    s5.write(0);
+    Serial.println("Hand open");
+    Serial.println(sens);
+    delay(1000);
+  }
+
+  count++;//count is incremented
+}
+
+
+
